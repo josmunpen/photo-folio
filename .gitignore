@@ -1,0 +1,17 @@
+.pi/
+
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Local env
+.env
+
+# Local photo folders
+photos/originals/
+photos/generated/
+
+PLAN.md

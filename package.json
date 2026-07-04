@@ -1,0 +1,25 @@
+{
+  "name": "photo-folio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "photos:build": "tsx scripts/photos-build.ts",
+    "photos:upload": "tsx scripts/photos-upload.ts",
+    "photos:sync": "npm run photos:build && npm run photos:upload"
+  },
+  "dependencies": {
+    "@astrojs/check": "latest",
+    "@aws-sdk/client-s3": "^3.1079.0",
+    "astro": "latest",
+    "dotenv": "^17.4.2",
+    "sharp": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

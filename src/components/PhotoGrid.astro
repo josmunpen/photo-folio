@@ -1,0 +1,118 @@
+---
+import PhotoPicture from "./PhotoPicture.astro";
+
+interface Photo {
+  id: string;
+  title: string;
+  description: string;
+  alt?: string;
+  src?: string;
+  aspectRatio?: number;
+  variants?: Record<string, Record<string, string>>;
+}
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<section class="photo-list" aria-label="Galería de fotografías">
+  {photos.map((photo, index) => (
+    <article class="photo-item" data-photo={JSON.stringify(photo)}>
+      <button class="photo-button" type="button" aria-label={`Abrir ${photo.title}`} data-index={index}>
+        <PhotoPicture photo={photo} class="photo-image" />
+      </button>
+      <div class="caption">
+        <h2>{photo.title}</h2>
+        <p>{photo.description}</p>
+      </div>
+    </article>
+  ))}
+</section>
+
+<div class="lightbox" data-lightbox hidden>
+  <button class="lightbox-close" type="button" aria-label="Cerrar">×</button>
+  <img class="lightbox-image" alt="" />
+  <div class="lightbox-caption">
+    <h2></h2>
+    <p></p>
+  </div>
+</div>
+
+<script>
+  const items = Array.from(document.querySelectorAll(".photo-item"));
+  const buttons = Array.from(document.querySelectorAll(".photo-button"));
+  const lightbox = document.querySelector("[data-lightbox]");
+  const lightboxImage = lightbox?.querySelector(".lightbox-image");
+  const lightboxTitle = lightbox?.querySelector(".lightbox-caption h2");
+  const lightboxDescription = lightbox?.querySelector(".lightbox-caption p");
+  const closeButton = lightbox?.querySelector(".lightbox-close");
+
+  let currentIndex = 0;
+
+  function readPhoto(index) {
+    const raw = items[index]?.getAttribute("data-photo");
+    if (!raw) return null;
+    return JSON.parse(raw);
+  }
+
+  function bestImageUrl(photo) {
+    return (
+      photo?.variants?.avif?.["4000"] ||
+      photo?.variants?.webp?.["4000"] ||
+      photo?.variants?.jpeg?.["4000"] ||
+      photo?.variants?.avif?.["3200"] ||
+      photo?.variants?.webp?.["3200"] ||
+      photo?.variants?.jpeg?.["3200"] ||
+      photo?.variants?.avif?.["2400"] ||
+      photo?.variants?.webp?.["2400"] ||
+      photo?.variants?.jpeg?.["2400"] ||
+      photo?.src ||
+      ""
+    );
+  }
+
+  function openLightbox(index) {
+    const photo = readPhoto(index);
+    if (!photo || !lightbox || !lightboxImage || !lightboxTitle || !lightboxDescription) return;
+
+    currentIndex = index;
+    lightboxImage.src = bestImageUrl(photo);
+    lightboxImage.alt = photo.alt || photo.title;
+    lightboxTitle.textContent = photo.title;
+    lightboxDescription.textContent = photo.description;
+    lightbox.hidden = false;
+    document.body.classList.add("no-scroll");
+  }
+
+  function closeLightbox() {
+    if (!lightbox || !lightboxImage) return;
+    lightbox.hidden = true;
+    lightboxImage.src = "";
+    document.body.classList.remove("no-scroll");
+  }
+
+  function moveLightbox(direction) {
+    if (!items.length) return;
+    const nextIndex = (currentIndex + direction + items.length) % items.length;
+    openLightbox(nextIndex);
+  }
+
+  buttons.forEach((button, index) => {
+    button.addEventListener("click", () => openLightbox(index));
+  });
+
+  closeButton?.addEventListener("click", closeLightbox);
+  lightbox?.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (!lightbox || lightbox.hidden) return;
+    if (event.key === "Escape") closeLightbox();
+    if (event.key === "ArrowRight") moveLightbox(1);
+    if (event.key === "ArrowLeft") moveLightbox(-1);
+  });
+</script>

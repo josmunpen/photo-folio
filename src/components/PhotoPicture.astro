@@ -1,0 +1,43 @@
+---
+type VariantMap = Record<string, Record<string, string>>;
+
+interface Props {
+  photo: {
+    title: string;
+    alt?: string;
+    src?: string;
+    variants?: VariantMap;
+  };
+  class?: string;
+  sizes?: string;
+}
+
+const {
+  photo,
+  class: className = "",
+  sizes = "(min-width: 900px) 80vw, 100vw",
+} = Astro.props;
+
+function srcset(format: string) {
+  const variants = photo.variants?.[format];
+  if (!variants) return undefined;
+
+  return Object.entries(variants)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([width, url]) => `${url} ${width}w`)
+    .join(", ");
+}
+
+const avifSrcset = srcset("avif");
+const webpSrcset = srcset("webp");
+const jpegSrcset = srcset("jpeg") || srcset("jpg");
+const fallbackSrc = photo.src || photo.variants?.webp?.["1200"] || photo.variants?.avif?.["1200"] || "";
+const alt = photo.alt || photo.title;
+---
+
+<picture>
+  {avifSrcset && <source type="image/avif" srcset={avifSrcset} sizes={sizes} />}
+  {webpSrcset && <source type="image/webp" srcset={webpSrcset} sizes={sizes} />}
+  {jpegSrcset && <source type="image/jpeg" srcset={jpegSrcset} sizes={sizes} />}
+  <img class={className} src={fallbackSrc} alt={alt} loading="lazy" decoding="async" />
+</picture>

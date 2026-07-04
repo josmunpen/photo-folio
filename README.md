@@ -11,7 +11,7 @@ npm run build    # check that the website builds correctly
 
 ## How to add photos
 
-The idea is to keep the original files out of the final repository, but while working locally you can place them here:
+The idea is to keep the original files out of the final repository, but while working locally you can place them here :
 
 ```text
 photos/originals/

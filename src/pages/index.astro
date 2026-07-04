@@ -2,8 +2,8 @@
 import PhotoGrid from "../components/PhotoGrid.astro";
 import photos from "../data/photos.json";
 
-const pageTitle = "Photo Folio";
-const pageDescription = "Portfolio de fotografía";
+const pageTitle = "josmunpen";
+const pageDescription = "Fotografías y desvaríos";
 ---
 
 <!doctype html>
@@ -17,11 +17,8 @@ const pageDescription = "Portfolio de fotografía";
   <body>
     <main class="site">
       <header class="hero">
-        <p class="eyebrow">Portfolio de fotografía</p>
         <h1>{pageTitle}</h1>
-        <p class="intro">
-          Una galería editorial, minimal y sencilla. Las imágenes de ejemplo se sustituirán por fotos optimizadas en Cloudflare R2.
-        </p>
+        <p class="intro">{pageDescription}</p>
       </header>
 
       <PhotoGrid photos={photos} />

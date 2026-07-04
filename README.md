@@ -1,62 +1,62 @@
 # Photo Folio
 
-Portfolio de fotografía sencillo con Astro, Cloudflare Pages y Cloudflare R2.
+A simple photography portfolio built with Astro, Cloudflare Pages, and Cloudflare R2.
 
-## Comandos básicos
+## Basic commands
 
 ```bash
-npm run dev      # ver la web en local
-npm run build    # comprobar que la web compila
+npm run dev      # run the website locally
+npm run build    # check that the website builds correctly
 ```
 
-## Cómo añadir fotos
+## How to add photos
 
-La idea es mantener los originales fuera del repo final, pero durante el trabajo local puedes ponerlos aquí:
+The idea is to keep the original files out of the final repository, but while working locally you can place them here:
 
 ```text
 photos/originals/
 ```
 
-Esta carpeta está ignorada por git.
+This folder is ignored by git.
 
-Luego añade una entrada en:
+Then add an entry to:
 
 ```text
 src/data/photos.json
 ```
 
-Ejemplo:
+Example:
 
 ```json
 {
-  "id": "mi-foto-01",
-  "title": "Mi foto",
-  "description": "Descripción corta.",
-  "alt": "Texto alternativo descriptivo",
-  "source": "mi-foto-01.jpg"
+  "id": "my-photo-01",
+  "title": "My photo",
+  "description": "Short description.",
+  "alt": "Descriptive alternative text",
+  "source": "my-photo-01.jpg"
 }
 ```
 
-El campo `source` debe coincidir con el nombre del archivo en `photos/originals/`.
+The `source` field must match the file name inside `photos/originals/`.
 
-## Generar versiones web
+## Generate web versions
 
 ```bash
 npm run photos:build
 ```
 
-Esto usa Sharp y genera:
+This uses Sharp and generates files in:
 
 ```text
 photos/generated/
 ```
 
-Formatos actuales:
+Current formats:
 
-- AVIF calidad 95
-- WebP calidad 98
+- AVIF quality 95
+- WebP quality 98
 
-Tamaños actuales:
+Current sizes:
 
 - 640px
 - 1200px
@@ -65,11 +65,11 @@ Tamaños actuales:
 - 3200px
 - 4000px
 
-También actualiza automáticamente `src/data/photos.json` con `aspectRatio`, `src` y `variants`.
+It also automatically updates `src/data/photos.json` with `aspectRatio`, `src`, and `variants`.
 
-## Subir imágenes a Cloudflare R2
+## Upload images to Cloudflare R2
 
-Copia `.env.example` a `.env` y rellena:
+Copy `.env.example` to `.env` and fill in:
 
 ```env
 R2_ACCOUNT_ID=
@@ -79,19 +79,19 @@ R2_BUCKET=
 R2_PUBLIC_BASE_URL=
 ```
 
-Después:
+Then run:
 
 ```bash
 npm run photos:upload
 ```
 
-O todo junto:
+Or run the full image workflow:
 
 ```bash
 npm run photos:sync
 ```
 
-## Despliegue en Cloudflare Pages
+## Deploy to Cloudflare Pages
 
 Build command:
 

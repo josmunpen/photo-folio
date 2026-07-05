@@ -11,20 +11,26 @@
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-640.avif",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-1200.avif",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-1800.avif",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-2400.avif",
-        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-3200.avif",
-        "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-4000.avif"
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-2400.avif"
       },
       "webp": {
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-640.webp",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-1200.webp",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-1800.webp",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-2400.webp",
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-2400.webp"
+      }
+    },
+    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-2400.webp",
+    "ultraHdVariants": {
+      "avif": {
+        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-3200.avif",
+        "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-4000.avif"
+      },
+      "webp": {
         "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-3200.webp",
         "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-4000.webp"
       }
-    },
-    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-01-4000.webp"
+    }
   },
   {
     "id": "sample-02",
@@ -38,20 +44,26 @@
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-640.avif",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-1200.avif",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-1800.avif",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-2400.avif",
-        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-3200.avif",
-        "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-4000.avif"
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-2400.avif"
       },
       "webp": {
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-640.webp",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-1200.webp",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-1800.webp",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-2400.webp",
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-2400.webp"
+      }
+    },
+    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-2400.webp",
+    "ultraHdVariants": {
+      "avif": {
+        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-3200.avif",
+        "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-4000.avif"
+      },
+      "webp": {
         "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-3200.webp",
         "4000": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-4000.webp"
       }
-    },
-    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-02-4000.webp"
+    }
   },
   {
     "id": "sample-03",
@@ -65,17 +77,23 @@
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-640.avif",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-1200.avif",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-1800.avif",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-2400.avif",
-        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-3200.avif"
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-2400.avif"
       },
       "webp": {
         "640": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-640.webp",
         "1200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-1200.webp",
         "1800": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-1800.webp",
-        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-2400.webp",
-        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-3200.webp"
+        "2400": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-2400.webp"
       }
     },
-    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-3200.webp"
+    "src": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-2400.webp",
+    "ultraHdVariants": {
+      "avif": {
+        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-3200.avif"
+      },
+      "webp": {
+        "3200": "https://pub-c658b93a5d8c49bda6c768bc8b869189.r2.dev/sample-03-3200.webp"
+      }
+    }
   }
 ]

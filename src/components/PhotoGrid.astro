@@ -9,6 +9,7 @@ interface Photo {
   src?: string;
   aspectRatio?: number;
   variants?: Record<string, Record<string, string>>;
+  ultraHdVariants?: Record<string, Record<string, string>>;
 }
 
 interface Props {
@@ -22,7 +23,7 @@ const { photos } = Astro.props;
   {photos.map((photo, index) => (
     <article class="photo-item" data-photo={JSON.stringify(photo)}>
       <button class="photo-button" type="button" aria-label={`Abrir ${photo.title}`} data-index={index}>
-        <PhotoPicture photo={photo} class="photo-image" />
+        <PhotoPicture photo={photo} class="photo-image" maxWidth={2400} />
       </button>
       <div class="caption">
         <h2>{photo.title}</h2>
@@ -34,23 +35,47 @@ const { photos } = Astro.props;
 
 <div class="lightbox" data-lightbox hidden>
   <button class="lightbox-close" type="button" aria-label="Cerrar">×</button>
-  <img class="lightbox-image" alt="" />
+  <picture class="lightbox-picture">
+    <source class="lightbox-source-avif" type="image/avif" />
+    <source class="lightbox-source-webp" type="image/webp" />
+    <source class="lightbox-source-jpeg" type="image/jpeg" />
+    <img class="lightbox-image" alt="" />
+  </picture>
   <div class="lightbox-caption">
     <h2></h2>
     <p></p>
   </div>
+  <div class="lightbox-lens" data-lightbox-lens hidden></div>
 </div>
 
 <script>
+  const params = new URLSearchParams(window.location.search);
+  const lightboxSize = params.get("lightbox");
+  const zoomModeParam = params.get("zoom");
+  const zoomMode = ["none", "basic", "pro"].includes(zoomModeParam || "") ? zoomModeParam : "none";
+
+  document.documentElement.dataset.zoomMode = zoomMode || "none";
+
+  if (["balanced", "immersive", "fullscreen"].includes(lightboxSize || "")) {
+    document.documentElement.dataset.lightboxSize = lightboxSize || "";
+  }
+
   const items = Array.from(document.querySelectorAll(".photo-item"));
   const buttons = Array.from(document.querySelectorAll(".photo-button"));
   const lightbox = document.querySelector("[data-lightbox]");
   const lightboxImage = lightbox?.querySelector(".lightbox-image");
+  const lightboxSources = {
+    avif: lightbox?.querySelector(".lightbox-source-avif"),
+    webp: lightbox?.querySelector(".lightbox-source-webp"),
+    jpeg: lightbox?.querySelector(".lightbox-source-jpeg"),
+  };
   const lightboxTitle = lightbox?.querySelector(".lightbox-caption h2");
   const lightboxDescription = lightbox?.querySelector(".lightbox-caption p");
   const closeButton = lightbox?.querySelector(".lightbox-close");
+  const lens = lightbox?.querySelector("[data-lightbox-lens]");
 
   let currentIndex = 0;
+  let proLensActive = false;
 
   function readPhoto(index) {
     const raw = items[index]?.getAttribute("data-photo");
@@ -58,20 +83,154 @@ const { photos } = Astro.props;
     return JSON.parse(raw);
   }
 
-  function bestImageUrl(photo) {
-    return (
-      photo?.variants?.avif?.["4000"] ||
-      photo?.variants?.webp?.["4000"] ||
-      photo?.variants?.jpeg?.["4000"] ||
-      photo?.variants?.avif?.["3200"] ||
-      photo?.variants?.webp?.["3200"] ||
-      photo?.variants?.jpeg?.["3200"] ||
-      photo?.variants?.avif?.["2400"] ||
-      photo?.variants?.webp?.["2400"] ||
-      photo?.variants?.jpeg?.["2400"] ||
+  function sortedVariantEntries(variants, format, minWidth = 0) {
+    return Object.entries(variants?.[format] || {})
+      .filter(([width]) => Number(width) >= minWidth)
+      .sort(([a], [b]) => Number(a) - Number(b));
+  }
+
+  function srcsetFor(variants, format, minWidth = 0) {
+    const entries = sortedVariantEntries(variants, format, minWidth);
+    if (!entries.length) return "";
+    return entries.map(([width, url]) => `${url} ${width}w`).join(", ");
+  }
+
+  function largestVariantUrl(variants, formats, minWidth = 0) {
+    for (const format of formats) {
+      const entries = sortedVariantEntries(variants, format, minWidth);
+      const largest = entries.at(-1);
+      if (largest) return largest[1];
+    }
+
+    return "";
+  }
+
+  function setLightboxSource(photo) {
+    const ultraVariants = photo?.ultraHdVariants || {};
+    const legacyUltraVariants = photo?.variants || {};
+
+    const avifSrcset = srcsetFor(ultraVariants, "avif") || srcsetFor(legacyUltraVariants, "avif", 3200);
+    const webpSrcset = srcsetFor(ultraVariants, "webp") || srcsetFor(legacyUltraVariants, "webp", 3200);
+    const jpegSrcset =
+      srcsetFor(ultraVariants, "jpeg") ||
+      srcsetFor(ultraVariants, "jpg") ||
+      srcsetFor(legacyUltraVariants, "jpeg", 3200) ||
+      srcsetFor(legacyUltraVariants, "jpg", 3200);
+
+    const fallbackSrc =
+      largestVariantUrl(ultraVariants, ["webp", "jpeg", "jpg", "avif"]) ||
+      largestVariantUrl(legacyUltraVariants, ["webp", "jpeg", "jpg", "avif"], 3200) ||
+      largestVariantUrl(photo?.variants, ["webp", "jpeg", "jpg", "avif"]) ||
       photo?.src ||
-      ""
-    );
+      "";
+
+    const sources = [
+      [lightboxSources.avif, avifSrcset],
+      [lightboxSources.webp, webpSrcset],
+      [lightboxSources.jpeg, jpegSrcset],
+    ];
+
+    for (const [source, srcset] of sources) {
+      if (!source) continue;
+      if (srcset) source.setAttribute("srcset", srcset);
+      else source.removeAttribute("srcset");
+    }
+
+    if (!lightboxImage) return;
+    if (fallbackSrc) lightboxImage.src = fallbackSrc;
+    else lightboxImage.removeAttribute("src");
+  }
+
+  function clearLightboxSource() {
+    for (const source of Object.values(lightboxSources)) {
+      source?.removeAttribute("srcset");
+    }
+
+    lightboxImage?.removeAttribute("src");
+  }
+
+  function hideLens() {
+    if (!lens) return;
+    lens.hidden = true;
+    lens.removeAttribute("style");
+  }
+
+  function resetLightboxZoom() {
+    proLensActive = false;
+    lightbox?.classList.remove("is-zoomed", "is-pro-lens-active");
+    lightbox?.scrollTo({ left: 0, top: 0 });
+    hideLens();
+  }
+
+  function toggleLightboxZoom(event) {
+    if (zoomMode !== "basic" || !lightbox || !lightboxImage) return;
+
+    const rect = lightboxImage.getBoundingClientRect();
+    const xRatio = rect.width ? (event.clientX - rect.left) / rect.width : 0.5;
+    const yRatio = rect.height ? (event.clientY - rect.top) / rect.height : 0.5;
+    const isZoomed = lightbox.classList.toggle("is-zoomed");
+
+    if (!isZoomed) {
+      lightbox.scrollTo({ left: 0, top: 0, behavior: "smooth" });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      lightbox.scrollTo({
+        left: lightbox.scrollWidth * xRatio - lightbox.clientWidth / 2,
+        top: lightbox.scrollHeight * yRatio - lightbox.clientHeight / 2,
+      });
+    });
+  }
+
+  function toggleProLens(event) {
+    if (zoomMode !== "pro" || !lightbox) return;
+
+    proLensActive = !proLensActive;
+    lightbox.classList.toggle("is-pro-lens-active", proLensActive);
+
+    if (proLensActive) updateProLens(event);
+    else hideLens();
+  }
+
+  function handleLightboxImageClick(event) {
+    if (zoomMode === "basic") toggleLightboxZoom(event);
+    if (zoomMode === "pro") toggleProLens(event);
+  }
+
+  function updateProLens(event) {
+    if (zoomMode !== "pro" || !proLensActive || !lightboxImage || !lens || event.pointerType !== "mouse") return;
+
+    const rect = lightboxImage.getBoundingClientRect();
+    const inside =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    if (!inside) {
+      hideLens();
+      return;
+    }
+
+    const lensSize = 300;
+    const scale = 2.35;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const maxLeft = window.innerWidth - lensSize - 12;
+    const maxTop = window.innerHeight - lensSize - 12;
+    const left = Math.min(Math.max(event.clientX - lensSize / 2, 12), maxLeft);
+    const top = Math.min(Math.max(event.clientY - lensSize / 2, 12), maxTop);
+    const imageUrl = lightboxImage.currentSrc || lightboxImage.src;
+
+    lens.hidden = false;
+    lens.style.left = `${left}px`;
+    lens.style.top = `${top}px`;
+    lens.style.width = `${lensSize}px`;
+    lens.style.height = `${lensSize}px`;
+    lens.style.backgroundImage = `url("${imageUrl}")`;
+    lens.style.backgroundSize = `${rect.width * scale}px ${rect.height * scale}px`;
+    lens.style.backgroundPosition = `${-(x * scale - lensSize / 2)}px ${-(y * scale - lensSize / 2)}px`;
   }
 
   function openLightbox(index) {
@@ -79,7 +238,8 @@ const { photos } = Astro.props;
     if (!photo || !lightbox || !lightboxImage || !lightboxTitle || !lightboxDescription) return;
 
     currentIndex = index;
-    lightboxImage.src = bestImageUrl(photo);
+    resetLightboxZoom();
+    setLightboxSource(photo);
     lightboxImage.alt = photo.alt || photo.title;
     lightboxTitle.textContent = photo.title;
     lightboxDescription.textContent = photo.description;
@@ -90,7 +250,8 @@ const { photos } = Astro.props;
   function closeLightbox() {
     if (!lightbox || !lightboxImage) return;
     lightbox.hidden = true;
-    lightboxImage.src = "";
+    resetLightboxZoom();
+    clearLightboxSource();
     document.body.classList.remove("no-scroll");
   }
 
@@ -104,6 +265,9 @@ const { photos } = Astro.props;
     button.addEventListener("click", () => openLightbox(index));
   });
 
+  lightboxImage?.addEventListener("click", handleLightboxImageClick);
+  lightboxImage?.addEventListener("pointermove", updateProLens);
+  lightboxImage?.addEventListener("pointerleave", hideLens);
   closeButton?.addEventListener("click", closeLightbox);
   lightbox?.addEventListener("click", (event) => {
     if (event.target === lightbox) closeLightbox();
@@ -112,6 +276,7 @@ const { photos } = Astro.props;
   window.addEventListener("keydown", (event) => {
     if (!lightbox || lightbox.hidden) return;
     if (event.key === "Escape") closeLightbox();
+    if (event.key.toLowerCase() === "z") toggleLightboxZoom({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
     if (event.key === "ArrowRight") moveLightbox(1);
     if (event.key === "ArrowLeft") moveLightbox(-1);
   });

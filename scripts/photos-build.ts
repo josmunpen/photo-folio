@@ -8,7 +8,8 @@ const GENERATED_DIR = path.resolve("photos/generated");
 const PHOTOS_JSON = path.resolve("src/data/photos.json");
 const PUBLIC_BASE_URL = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
 
-const WIDTHS = [640, 1200, 1800, 2400, 3200, 4000];
+const DISPLAY_WIDTHS = [640, 1200, 1800, 2400];
+const ULTRA_HD_WIDTHS = [3200, 4000];
 const FORMATS = [
   { name: "avif", extension: "avif", options: { quality: 95, effort: 9 } },
   { name: "webp", extension: "webp", options: { quality: 98, effort: 6 } },
@@ -23,6 +24,7 @@ interface Photo {
   src?: string;
   aspectRatio?: number;
   variants?: Record<string, Record<string, string>>;
+  ultraHdVariants?: Record<string, Record<string, string>>;
 }
 
 async function readPhotos(): Promise<Photo[]> {
@@ -55,34 +57,47 @@ async function main() {
       continue;
     }
 
-    const widths = WIDTHS.filter((candidate) => candidate <= metadata.width!);
+    const displayWidths = DISPLAY_WIDTHS.filter((candidate) => candidate <= metadata.width!);
+    const ultraHdWidths = ULTRA_HD_WIDTHS.filter((candidate) => candidate <= metadata.width!);
     const variants: Record<string, Record<string, string>> = {};
+    const ultraHdVariants: Record<string, Record<string, string>> = {};
 
-    for (const width of widths) {
-      for (const format of FORMATS) {
-        const outputFile = `${id}-${width}.${format.extension}`;
-        const outputPath = path.join(GENERATED_DIR, outputFile);
+    async function generateVariants(widths: number[], target: Record<string, Record<string, string>>) {
+      for (const width of widths) {
+        for (const format of FORMATS) {
+          const outputFile = `${id}-${width}.${format.extension}`;
+          const outputPath = path.join(GENERATED_DIR, outputFile);
 
-        let pipeline = sharp(inputPath).rotate().resize({ width, withoutEnlargement: true });
+          let pipeline = sharp(inputPath).rotate().resize({ width, withoutEnlargement: true });
 
-        if (format.name === "avif") {
-          pipeline = pipeline.avif(format.options);
-        } else {
-          pipeline = pipeline.webp(format.options);
+          if (format.name === "avif") {
+            pipeline = pipeline.avif(format.options);
+          } else {
+            pipeline = pipeline.webp(format.options);
+          }
+
+          await pipeline.toFile(outputPath);
+
+          target[format.name] ??= {};
+          target[format.name][String(width)] = variantUrl(outputFile);
+
+          console.log(`Generada ${outputFile}`);
         }
-
-        await pipeline.toFile(outputPath);
-
-        variants[format.name] ??= {};
-        variants[format.name][String(width)] = variantUrl(outputFile);
-
-        console.log(`Generada ${outputFile}`);
       }
     }
 
+    await generateVariants(displayWidths, variants);
+    await generateVariants(ultraHdWidths, ultraHdVariants);
+
     photo.aspectRatio = Number((metadata.width / metadata.height).toFixed(4));
     photo.variants = variants;
-    photo.src = variants.webp?.[String(widths.at(-1))] || variants.avif?.[String(widths.at(-1))] || photo.src;
+    if (ultraHdWidths.length) {
+      photo.ultraHdVariants = ultraHdVariants;
+    } else {
+      delete photo.ultraHdVariants;
+    }
+
+    photo.src = variants.webp?.[String(displayWidths.at(-1))] || variants.avif?.[String(displayWidths.at(-1))] || photo.src;
     processed++;
   }
 

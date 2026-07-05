@@ -56,16 +56,19 @@ Current formats:
 - AVIF quality 95
 - WebP quality 98
 
-Current sizes:
+Current display sizes:
 
 - 640px
 - 1200px
 - 1800px
 - 2400px
+
+UltraHD sizes for the lightbox/zoom view:
+
 - 3200px
 - 4000px
 
-It also automatically updates `src/data/photos.json` with `aspectRatio`, `src`, and `variants`.
+It also automatically updates `src/data/photos.json` with `aspectRatio`, `src`, `variants`, and `ultraHdVariants`. The gallery only advertises display variants, so UltraHD files are requested when the lightbox image is opened.
 
 ## Upload images to Cloudflare R2
 

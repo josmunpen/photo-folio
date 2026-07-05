@@ -10,28 +10,46 @@ interface Props {
   };
   class?: string;
   sizes?: string;
+  maxWidth?: number;
 }
 
 const {
   photo,
   class: className = "",
   sizes = "(min-width: 900px) 80vw, 100vw",
+  maxWidth = 2400,
 } = Astro.props;
 
-function srcset(format: string) {
+function entriesFor(format: string) {
   const variants = photo.variants?.[format];
-  if (!variants) return undefined;
+  if (!variants) return [];
 
   return Object.entries(variants)
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([width, url]) => `${url} ${width}w`)
-    .join(", ");
+    .filter(([width]) => Number(width) <= maxWidth)
+    .sort(([a], [b]) => Number(a) - Number(b));
+}
+
+function srcset(format: string) {
+  const entries = entriesFor(format);
+  if (!entries.length) return undefined;
+
+  return entries.map(([width, url]) => `${url} ${width}w`).join(", ");
+}
+
+function largestVariant(formats: string[]) {
+  for (const format of formats) {
+    const entries = entriesFor(format);
+    const largest = entries.at(-1);
+    if (largest) return largest[1];
+  }
+
+  return "";
 }
 
 const avifSrcset = srcset("avif");
 const webpSrcset = srcset("webp");
 const jpegSrcset = srcset("jpeg") || srcset("jpg");
-const fallbackSrc = photo.src || photo.variants?.webp?.["1200"] || photo.variants?.avif?.["1200"] || "";
+const fallbackSrc = largestVariant(["webp", "avif", "jpeg", "jpg"]) || photo.src || "";
 const alt = photo.alt || photo.title;
 ---
 
